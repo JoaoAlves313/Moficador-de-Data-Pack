@@ -54,7 +54,8 @@ const App: React.FC = () => {
     TEAMS.forEach(team => {
       const leagueKey = team.league;
       if (!leaguesData[leagueKey]) {
-        const leagueName = leagueKey === 'brasileirao-a' ? 'Brasileirão Série A' : 'Premier League';
+        const leagueInfo = LEAGUES.find(l => l.key === leagueKey);
+        const leagueName = leagueInfo ? leagueInfo.name : leagueKey;
         leaguesData[leagueKey] = { key: leagueKey, name: leagueName, teams: [], allTeamIds: [] };
         filterNames[leagueKey] = leagueName;
       }
