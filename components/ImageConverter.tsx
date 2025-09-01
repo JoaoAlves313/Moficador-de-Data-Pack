@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { UploadIcon, DownloadIcon, ClearIcon, SparklesIcon } from './Icons';
+import { UploadIcon, DownloadIcon, ClearIcon, SparklesIcon, CogIcon } from './Icons';
 import ApiKeyModal from './ApiKeyModal';
 
 // Helper function to convert a data URL to a Blob
@@ -213,6 +213,11 @@ const ImageConverter: React.FC = () => {
     setIsApiKeyModalOpen(false);
   };
 
+  const handleResetApiKey = () => {
+    localStorage.removeItem('removebg_api_key');
+    setApiKey('');
+  };
+
   const borderColor = isDragging ? 'border-blue-500' : 'border-gray-600';
   const bgColor = isDragging ? 'bg-gray-700/50' : 'bg-gray-800/50';
 
@@ -282,7 +287,7 @@ const ImageConverter: React.FC = () => {
                       </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
                       <button 
                           onClick={handleDownload}
                           disabled={isRemovingBackground}
@@ -310,6 +315,17 @@ const ImageConverter: React.FC = () => {
                               </>
                           )}
                       </button>
+                      {apiKey && (
+                        <button
+                          onClick={handleResetApiKey}
+                          disabled={isRemovingBackground}
+                          title="Redefinir predefinições da API"
+                          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-wait"
+                        >
+                          <CogIcon className="h-5 w-5" />
+                          Redefinir API
+                        </button>
+                      )}
                       <button 
                           onClick={handleReset} 
                           disabled={isRemovingBackground}

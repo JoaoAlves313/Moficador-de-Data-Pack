@@ -176,33 +176,33 @@ const App: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [data, fileName]);
 
-  const handleAddLegends = useCallback(() => {
-    if (headers.length < 2) {
-        setError("Para adicionar lendas, o CSV carregado deve ter pelo menos duas colunas (chave e nome).");
-        return;
-    }
+  // const handleAddLegends = useCallback(() => {
+  //   if (headers.length < 2) {
+  //       setError("Para adicionar lendas, o CSV carregado deve ter pelo menos duas colunas (chave e nome).");
+  //       return;
+  //   }
 
-    const legendsCsv = `890400020,Adam Kamiński...`; // (content abbreviated for brevity)
-    const lines = legendsCsv.split('\n').filter(line => line.trim() !== '');
-    const keyColumn = headers[0];
-    const nameColumn = headers[1];
+  //   const legendsCsv = `890400020,Adam Kamiński...`; // (content abbreviated for brevity)
+  //   const lines = legendsCsv.split('\n').filter(line => line.trim() !== '');
+  //   const keyColumn = headers[0];
+  //   const nameColumn = headers[1];
 
-    const newRows: CsvRow[] = lines.map(line => {
-        const parts = line.split(',');
-        const newRow: CsvRow = { [keyColumn]: parts[0], [nameColumn]: parts.slice(1).join(',') };
-        headers.slice(2).forEach(h => newRow[h] = '');
-        return newRow;
-    });
+  //   const newRows: CsvRow[] = lines.map(line => {
+  //       const parts = line.split(',');
+  //       const newRow: CsvRow = { [keyColumn]: parts[0], [nameColumn]: parts.slice(1).join(',') };
+  //       headers.slice(2).forEach(h => newRow[h] = '');
+  //       return newRow;
+  //   });
 
-    const existingKeys = new Set(data.map(row => row[keyColumn]));
-    const uniqueNewRows = newRows.filter(row => !existingKeys.has(row[keyColumn]));
+  //   const existingKeys = new Set(data.map(row => row[keyColumn]));
+  //   const uniqueNewRows = newRows.filter(row => !existingKeys.has(row[keyColumn]));
 
-    if (uniqueNewRows.length > 0) {
-      const newData = [...data, ...uniqueNewRows];
-      setData(newData);
-      runFilters(newData, activeSearchTerm, activeTeamFilter, activeLeagueFilter);
-    }
-  }, [data, headers, runFilters, activeSearchTerm, activeTeamFilter, activeLeagueFilter]);
+  //   if (uniqueNewRows.length > 0) {
+  //     const newData = [...data, ...uniqueNewRows];
+  //     setData(newData);
+  //     runFilters(newData, activeSearchTerm, activeTeamFilter, activeLeagueFilter);
+  //   }
+  // }, [data, headers, runFilters, activeSearchTerm, activeTeamFilter, activeLeagueFilter]);
   
   const triggerSearch = useCallback(() => {
     const termToApply = searchTerm.trim();
@@ -280,7 +280,7 @@ const App: React.FC = () => {
               <button onClick={triggerSearch} className="flex-grow sm:flex-grow-0 w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" title="Pesquisar"><SearchIcon className="h-5 w-5" />Pesquisar</button>
               {appMode === 'players' && <button onClick={() => setIsTeamFilterModalOpen(true)} className="flex-grow sm:flex-grow-0 w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors"><FilterIcon className="h-5 w-5" />Filtrar por Time</button>}
               {appMode === 'clubs' && <button onClick={() => setIsLeagueFilterModalOpen(true)} className="flex-grow sm:flex-grow-0 w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors"><FilterIcon className="h-5 w-5" />Filtrar por Liga</button>}
-              {appMode === 'players' && <button onClick={handleAddLegends} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"><StarIcon className="h-5 w-5" />Adicionar Lendas</button>}
+              {/* {appMode === 'players' && <button onClick={handleAddLegends} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"><StarIcon className="h-5 w-5" />Adicionar Lendas</button>} */}
               <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"><DownloadIcon />Salvar CSV</button>
             </div>
           </div>
