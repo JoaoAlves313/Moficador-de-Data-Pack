@@ -9,6 +9,7 @@ import TeamFilterModal from './components/TeamFilterModal';
 import LeagueFilterModal from './components/LeagueFilterModal';
 import ModeSelection from './components/ModeSelection';
 import ImageConverter from './components/ImageConverter';
+import ViewerModal from './components/ViewerModal';
 import { DownloadIcon, SearchIcon, ClearIcon, FilterIcon, StarIcon } from './components/Icons';
 import { TEAMS } from './data/teams';
 import { LEAGUES } from './data/leagues';
@@ -44,6 +45,10 @@ const App: React.FC = () => {
   const [isLeagueFilterModalOpen, setIsLeagueFilterModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
+
+  // Easter egg state
+  const [titleClickCount, setTitleClickCount] = useState(0);
+  const [isViewerModalOpen, setIsViewerModalOpen] = useState(false);
 
   // Derive data structures for players
   const { LEAGUES_DATA_FOR_PLAYERS, PLAYER_FILTER_NAMES, PLAYER_FILTER_IDS } = useMemo(() => {
@@ -255,6 +260,15 @@ const App: React.FC = () => {
     setActiveLeagueFilter(null);
     runFilters(data, activeSearchTerm, null, null);
   };
+  
+  const handleTitleClick = () => {
+    const newCount = titleClickCount + 1;
+    setTitleClickCount(newCount);
+    if (newCount >= 5) {
+        setIsViewerModalOpen(true);
+        setTitleClickCount(0); // Reset after opening
+    }
+  };
 
   const renderCsvContent = () => {
     if (!appMode) {
@@ -299,12 +313,13 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 antialiased flex flex-col">
-      <Header currentView={currentView} onNavigate={setCurrentView} />
+      <Header currentView={currentView} onNavigate={setCurrentView} onTitleClick={handleTitleClick} />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
         {currentView === 'csv' ? renderCsvContent() : <ImageConverter />}
       </main>
       {currentView === 'csv' && appMode === 'players' && <TeamFilterModal isOpen={isTeamFilterModalOpen} onClose={() => setIsTeamFilterModalOpen(false)} onSelectTeam={handleSelectTeam} onClearFilter={handleClearTeamFilter} activeFilter={activeTeamFilter} leaguesData={LEAGUES_DATA_FOR_PLAYERS} />}
       {currentView === 'csv' && appMode === 'clubs' && <LeagueFilterModal isOpen={isLeagueFilterModalOpen} onClose={() => setIsLeagueFilterModalOpen(false)} onSelectLeague={handleSelectLeague} onClearFilter={handleClearLeagueFilter} activeFilter={activeLeagueFilter} leagues={LEAGUE_NAMES} />}
+      <ViewerModal isOpen={isViewerModalOpen} onClose={() => setIsViewerModalOpen(false)} />
     </div>
   );
 };
