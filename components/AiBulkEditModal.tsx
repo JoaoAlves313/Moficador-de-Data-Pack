@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ClearIcon, SparklesIcon } from './Icons';
-import { GoogleGenAI } from '@google/genai';
 import { CsvRow } from '../types';
 
 interface AiBulkEditModalProps {
@@ -40,6 +39,22 @@ const AiBulkEditModal: React.FC<AiBulkEditModalProps> = ({ isOpen, onClose, data
     }
   }, [isOpen, headers]);
 
+  const callApiProxy = async (body: object) => {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'A comunicação com a API falhou.');
+    }
+    return response.json();
+  }
+
   const handleAiEdit = useCallback(async () => {
     if (!prompt.trim() || !targetColumn || isLoading) return;
     setIsLoading(true);
@@ -51,49 +66,18 @@ const AiBulkEditModal: React.FC<AiBulkEditModalProps> = ({ isOpen, onClose, data
     const dataForPrompt = data.slice(0, 20).map(row => ({ [keyColumn]: row[keyColumn], [targetColumn]: row[targetColumn] }));
 
     try {
-      if (!process.env.API_KEY) throw new Error("A chave da API não está configurada.");
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
-      const result = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: `Você é um assistente de IA encarregado de editar em massa uma coluna em um arquivo CSV.
-        O usuário está visualizando um conjunto de dados filtrado por: "${currentFilterName}". As edições devem ser aplicadas a este subconjunto de dados.
-        A coluna que o usuário deseja editar é: "${targetColumn}".
-        A coluna de chave primária é "${keyColumn}".
-        Aqui estão até 20 linhas dos dados para contexto (apenas a chave e a coluna de destino):
-        ${JSON.stringify(dataForPrompt)}
-
-        Instrução do usuário: "${prompt}"
-
-        Com base na instrução do usuário, gere novos valores para a coluna "${targetColumn}" para todas as linhas relevantes nos dados fornecidos. Se necessário, use seu conhecimento e pesquise na internet por informações precisas (por exemplo, nomes de jogadores de um ano específico, capitais corretas, etc.).
-
-        Sua saída DEVE ser um objeto JSON com uma única chave "edits". O valor dessa chave deve ser um array de objetos. Cada objeto deve conter a 'key' (da coluna "${keyColumn}") e o 'newValue' para a coluna "${targetColumn}".
-        Exemplo de formato: { "edits": [{ "key": "algum_id_1", "newValue": "novo valor" }, { "key": "algum_id_2", "newValue": "outro novo valor" }] }
-        
-        Inclua apenas as linhas que precisam ser alteradas. Se nenhuma alteração for necessária, retorne um objeto com um array "edits" vazio: { "edits": [] }`,
-        config: {
-          tools: [{googleSearch: {}}],
-        },
+      const result = await callApiProxy({
+        type: 'bulk-edit',
+        context: {
+            currentFilterName,
+            targetColumn,
+            keyColumn,
+            dataForPrompt,
+            prompt,
+        }
       });
 
-      const extractJsonFromText = (text: string) => {
-        const match = text.match(/```json\s*([\s\S]*?)\s*```/);
-        if (match && match[1]) {
-            return JSON.parse(match[1]);
-        }
-        const jsonStart = text.indexOf('{');
-        const jsonEnd = text.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-            const jsonString = text.substring(jsonStart, jsonEnd + 1);
-            try {
-                return JSON.parse(jsonString);
-            } catch(e) { /* Fall through */ }
-        }
-        throw new Error("Não foi possível extrair o JSON da resposta da IA.");
-      };
-
-      const responseJson = extractJsonFromText(result.text);
-      const edits: { key: string, newValue: string }[] = responseJson.edits || [];
+      const edits: { key: string, newValue: string }[] = result.edits || [];
       
       if (edits.length === 0) {
         setResponse("A IA não encontrou nenhuma alteração a ser feita com base na sua solicitação.");
@@ -106,7 +90,7 @@ const AiBulkEditModal: React.FC<AiBulkEditModalProps> = ({ isOpen, onClose, data
         setSuggestedChanges(changesWithOldValues);
       }
     } catch (e: any) {
-      console.error("Gemini API error:", e);
+      console.error("API proxy error:", e);
       setError(`Erro da IA: ${e.message || 'Falha ao obter uma resposta.'}`);
     } finally {
       setIsLoading(false);
@@ -133,26 +117,21 @@ const AiBulkEditModal: React.FC<AiBulkEditModalProps> = ({ isOpen, onClose, data
     setResponse(null);
     setSuggestedChanges(null);
     try {
-      if (!process.env.API_KEY) throw new Error("A chave da API não está configurada.");
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const dataForPrompt = data.slice(0, 20).map(row => JSON.stringify(row));
-
-      const result = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Você é um assistente de análise de dados. Com base no contexto do arquivo CSV e nos dados, responda à pergunta do usuário.
-        Nome do arquivo: "${fileName}"
-        Cabeçalhos: ${headers.join(', ')}
-        Filtro ativo: "${currentFilterName}"
-        Primeiras 20 linhas de dados (formato JSON):
-        ${dataForPrompt.join('\n')}
-
-        Pergunta do usuário: "${prompt}"
-
-        Forneça uma resposta concisa e direta.`,
+      
+      const result = await callApiProxy({
+        type: 'question',
+        context: {
+            fileName,
+            headers,
+            currentFilterName,
+            dataForPrompt,
+            prompt
+        }
       });
       setResponse(result.text);
     } catch (e: any) {
-      console.error("Gemini API error:", e);
+      console.error("API proxy error:", e);
       setError(`Erro da IA: ${e.message || 'Falha ao obter uma resposta.'}`);
     } finally {
       setIsLoading(false);

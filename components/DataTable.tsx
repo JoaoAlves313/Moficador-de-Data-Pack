@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { CsvRow } from '../types';
 import { SparklesIcon, ClearIcon } from './Icons';
-import { GoogleGenAI, Type } from '@google/genai';
 
 interface AiPopoverState {
   anchorEl: HTMLElement | null;
@@ -62,32 +61,27 @@ const DataTable: React.FC<DataTableProps> = ({ headers, data, onDataChange, noRe
     });
 
     try {
-      if (!process.env.API_KEY) {
-        throw new Error("A chave da API não está configurada.");
-      }
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const currentValue = row[header] || '';
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Você é um assistente criativo para um editor de dados de jogos. O usuário está editando um nome. Dado o nome atual "${currentValue}", forneça 5 sugestões criativas e alternativas. As sugestões devem ser concisas.`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              suggestions: {
-                type: Type.ARRAY,
-                description: 'Uma lista de 5 nomes alternativos.',
-                items: { type: Type.STRING },
-              },
-            },
-            required: ['suggestions'],
-          },
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          type: 'suggestions',
+          context: {
+            currentValue,
+          },
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Falha na comunicação com a API.');
+      }
       
-      const result = JSON.parse(response.text);
+      const result = await response.json();
 
       setAiPopoverState(prevState => ({
         ...prevState,
@@ -97,7 +91,7 @@ const DataTable: React.FC<DataTableProps> = ({ headers, data, onDataChange, noRe
       }));
 
     } catch (error: any) {
-      console.error("Gemini API error:", error);
+      console.error("API proxy error:", error);
       setAiPopoverState(prevState => ({
         ...prevState,
         isLoading: false,
