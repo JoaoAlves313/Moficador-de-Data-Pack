@@ -1,6 +1,6 @@
 {
-  "name": "Modificador de Data Pack",
-  "description": "Uma aplicação para editar arquivos CSV de pacotes de dados de jogos. Escolha entre editar arquivos de clubes (filtrando por ligas) ou de jogadores (filtrando por times).",
+  "name": "Data Pack Modifier",
+  "description": "An application for editing game data pack CSV files. Choose between editing club files (filtering by leagues) or player files (filtering by teams).",
   "requestFramePermissions": [],
   "prompt": ""
 }

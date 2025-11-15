@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { ClearIcon, SearchIcon } from './Icons';
 
@@ -26,7 +25,8 @@ const LeagueFilterModal: React.FC<LeagueFilterModalProps> = ({ isOpen, onClose, 
     }
     const lowercasedSearchTerm = searchTerm.toLowerCase();
     return Object.entries(leagues).filter(([key, name]) =>
-      name.toLowerCase().includes(lowercasedSearchTerm)
+      // Fix: Cast `name` to a string to prevent `toLowerCase` on `unknown` type error.
+      String(name).toLowerCase().includes(lowercasedSearchTerm)
     );
   }, [leagues, searchTerm]);
 
@@ -82,7 +82,7 @@ const LeagueFilterModal: React.FC<LeagueFilterModalProps> = ({ isOpen, onClose, 
                             : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                         }`}
                     >
-                        {name}
+                        {String(name)}
                     </button>
                 ))
             ) : (

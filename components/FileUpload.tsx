@@ -17,11 +17,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileLoaded, error, setError, 
 
   const handleFileParse = useCallback((file: File) => {
     if (!file) {
-      setError("Nenhum arquivo selecionado.");
+      setError("No file selected.");
       return;
     }
     if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-       setError("Tipo de arquivo inválido. Por favor, envie um arquivo .csv.");
+       setError("Invalid file type. Please upload a .csv file.");
        return;
     }
     setError('');
@@ -34,7 +34,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileLoaded, error, setError, 
       },
       error: (err: any, file: File) => {
         console.error("PapaParse error:", err, file);
-        setError(`Falha ao analisar ${file.name}: ${err.message}`);
+        setError(`Failed to parse ${file.name}: ${err.message}`);
       }
     });
   }, [onFileLoaded, setError]);
@@ -74,7 +74,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileLoaded, error, setError, 
   
   const borderColor = isDragging ? 'border-blue-500' : 'border-gray-600';
   const bgColor = isDragging ? 'bg-gray-700/50' : 'bg-gray-800/50';
-  const modeText = mode === 'clubs' ? 'de clubes' : 'de jogadores';
+  const modeText = mode === 'clubs' ? 'for clubs' : 'for players';
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -88,11 +88,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileLoaded, error, setError, 
         <div className="text-center">
           <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
           <p className="mt-4 text-lg font-semibold text-gray-300">
-            Arraste e solte seu arquivo CSV {modeText} aqui
+            Drag and drop your {modeText} CSV file here
           </p>
-          <p className="mt-1 text-sm text-gray-500">ou</p>
+          <p className="mt-1 text-sm text-gray-500">or</p>
           <label htmlFor="file-upload" className="mt-2 inline-block cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
-            Procurar Arquivo
+            Browse File
           </label>
         </div>
         <input id="file-upload" name="file-upload" type="file" className="sr-only" accept=".csv" onChange={handleFileChange} />
@@ -105,10 +105,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileLoaded, error, setError, 
       <div className="mt-8 p-6 bg-gray-800/50 rounded-lg border border-gray-700">
         <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
           <CsvFileIcon/>
-          Formato CSV Esperado
+          Expected CSV Format
         </h3>
         <p className="mt-2 text-gray-400">
-          Seu arquivo CSV deve ter uma linha de cabeçalho. A primeira coluna será tratada como a chave única para cada item e não será editável. As colunas subsequentes são para diferentes localizações.
+          Your CSV file should have a header row. The first column will be treated as the unique key for each item and will not be editable. Subsequent columns are for different localizations.
         </p>
         <pre className="mt-4 p-3 bg-gray-900 rounded-md text-sm text-gray-300 overflow-x-auto">
           <code>

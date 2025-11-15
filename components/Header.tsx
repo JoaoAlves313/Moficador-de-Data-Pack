@@ -19,12 +19,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, onTitleClick }
         <h1 
           onClick={onTitleClick}
           className="text-3xl sm:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300 cursor-pointer"
-          title="O que será que acontece se clicar aqui?"
+          title="O que acontece se você clicar aqui?"
         >
-          Modificador de Data Pack
+          Data Pack Modifier
         </h1>
         <p className="text-center text-gray-400 mt-2">
-          Criado com auxilio de IA por Sussy Boy
+          Criado com assistência de IA por Sussy Boy
         </p>
         <nav className="flex justify-center gap-4 mt-6">
             <button 
@@ -32,14 +32,14 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, onTitleClick }
               className={`${navButtonClasses} ${currentView === 'csv' ? activeClasses : inactiveClasses}`}
               aria-current={currentView === 'csv' ? 'page' : undefined}
             >
-                <CsvFileIcon /> Editor CSV
+                <CsvFileIcon /> Editor de CSV
             </button>
             <button 
               onClick={() => onNavigate('image')} 
               className={`${navButtonClasses} ${currentView === 'image' ? activeClasses : inactiveClasses}`}
               aria-current={currentView === 'image' ? 'page' : undefined}
             >
-                <ImageIcon className="h-6 w-6" /> Conversor de Imagens
+                <ImageIcon className="h-6 w-6" /> Conversor de Imagem
             </button>
         </nav>
       </div>
